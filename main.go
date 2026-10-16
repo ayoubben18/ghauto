@@ -5,7 +5,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"net/url"
 	"os"
 	"os/exec"
 	"strings"
@@ -16,6 +15,7 @@ const usage = `ghauto - push to any GitHub repo with whichever gh account has ac
 Usage:
   ghauto setup            Use ghauto as git's credential helper for github.com
   ghauto uninstall        Restore gh's default credential helper
+  ghauto gh <args>        Run gh as the account that can access the target repo
   ghauto which [remote]   Show which account will be used (default remote: origin)
   ghauto forget [repo]    Drop a cached choice (owner/repo), or all with no argument
   ghauto credential get|store|erase   (called by git)
@@ -34,6 +34,8 @@ func main() {
 			break
 		}
 		err = credential(os.Args[2])
+	case "gh":
+		err = runGh(os.Args[2:])
 	case "setup":
 		err = setup()
 	case "uninstall":
@@ -141,12 +143,11 @@ func which(remote string) error {
 		return fmt.Errorf("no remote %q in this repo", remote)
 	}
 	raw := strings.TrimSpace(string(out))
-	u, err := url.Parse(raw)
-	if err != nil || u.Scheme != "https" {
-		return fmt.Errorf("remote %q is %s; ghauto only handles https remotes", remote, raw)
+	host, repo := parseRemoteURL(raw)
+	if repo == "" {
+		return fmt.Errorf("can't parse remote %q: %s", remote, raw)
 	}
-	repo := repoFromPath(u.Path)
-	res, results, err := resolve(u.Host, repo)
+	res, results, err := resolve(host, repo)
 	if err != nil {
 		for _, r := range results {
 			if r.Err != nil {

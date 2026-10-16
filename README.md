@@ -4,7 +4,8 @@ Push to any GitHub repo with whichever `gh` account has access. No more `gh auth
 
 If you have several GitHub accounts (personal, work, client...), `git push` only works for
 repos the currently active account can access. ghauto fixes that: it picks the right account
-for each repo automatically, so plain `git push`, `git pull` and `git clone` just work.
+for each repo automatically, so plain `git push`, `git pull` and `git clone` just work, and so do
+`gh` commands like `gh issue create` and `gh pr create`.
 
 ## How it works
 
@@ -15,6 +16,10 @@ ghauto is a [git credential helper](https://git-scm.com/docs/gitcredentials). It
 2. ghauto asks the GitHub API, with each of your `gh` accounts in parallel, what access it has on that repo.
 3. It picks the account with the highest permission and caches the choice (`~/.config/ghauto/cache.json`).
 4. It hands git that account's token. Tokens stay in `gh`'s keyring; ghauto stores none.
+
+For `gh`, `ghauto gh <args>` works out the target repo the same way gh does (`-R`, `GH_REPO`,
+`gh repo clone owner/repo`, then the current repo's remotes) and runs the real `gh` with that
+account's token. Commands with no repo context (`gh api user`, `gh auth ...`) run unchanged.
 
 If no account can access the repo, git stops with a clear error instead of prompting for a password.
 If GitHub rejects a cached account later, the cache entry is dropped and the next push re-checks.
@@ -83,9 +88,20 @@ ghauto which
 
 Then just `git push`.
 
+### 5. Make `gh` use it too (optional, recommended)
+
+Add to `~/.zshrc` or `~/.bashrc`:
+
+```sh
+gh() { ghauto gh "$@"; }
+```
+
+Now `gh issue create`, `gh pr create`, `gh repo clone owner/repo` pick the right account too.
+An explicit `GH_TOKEN=... gh ...` still wins.
+
 ### Using SSH remotes?
 
-ghauto only handles HTTPS. Switch a repo's remote with:
+`ghauto gh` works with SSH remotes, but the git credential helper only handles HTTPS. Switch a repo's remote with:
 
 ```sh
 git remote set-url origin https://github.com/owner/repo.git
@@ -96,6 +112,7 @@ git remote set-url origin https://github.com/owner/repo.git
 | Command | What it does |
 | --- | --- |
 | `ghauto setup` | Make ghauto git's credential helper for github.com |
+| `ghauto gh <args>` | Run `gh` as the account that can access the target repo |
 | `ghauto which [remote]` | Show which account a repo resolves to (default `origin`) |
 | `ghauto forget [owner/repo]` | Clear one cached choice, or all of them |
 | `ghauto uninstall` | Restore `gh`'s credential helper |
