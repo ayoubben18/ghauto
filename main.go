@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -22,6 +23,14 @@ Usage:
 `
 
 func main() {
+	// Installed as a "gh" symlink on PATH: behave like `ghauto gh`.
+	if filepath.Base(os.Args[0]) == "gh" {
+		if err := runGh(os.Args[1:]); err != nil {
+			fmt.Fprintln(os.Stderr, "ghauto:", err)
+			os.Exit(1)
+		}
+		return
+	}
 	if len(os.Args) < 2 {
 		fmt.Fprint(os.Stderr, usage)
 		os.Exit(2)

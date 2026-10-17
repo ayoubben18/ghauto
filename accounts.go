@@ -11,7 +11,7 @@ import (
 // ghCmd runs gh against its keyring logins, ignoring any token in the
 // environment (which would otherwise mask every account).
 func ghCmd(args ...string) *exec.Cmd {
-	cmd := exec.Command("gh", args...)
+	cmd := exec.Command(realGh(), args...)
 	for _, kv := range os.Environ() {
 		k, _, _ := strings.Cut(kv, "=")
 		switch k {

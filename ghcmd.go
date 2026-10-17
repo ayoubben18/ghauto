@@ -12,8 +12,8 @@ import (
 // runGh runs the real gh with the token of the account that can access the
 // repo the command targets. Commands without a repo context pass through as-is.
 func runGh(args []string) error {
-	ghPath, err := exec.LookPath("gh")
-	if err != nil {
+	ghPath := realGh()
+	if ghPath == "gh" {
 		return fmt.Errorf("gh not found on PATH")
 	}
 	cmd := exec.Command(ghPath, args...)
@@ -33,7 +33,7 @@ func runGh(args []string) error {
 		}
 	}
 
-	err = cmd.Run()
+	err := cmd.Run()
 	var exitErr *exec.ExitError
 	if errors.As(err, &exitErr) {
 		os.Exit(exitErr.ExitCode())

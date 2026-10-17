@@ -90,11 +90,15 @@ Then just `git push`.
 
 ### 5. Make `gh` use it too (optional, recommended)
 
-Add to `~/.zshrc` or `~/.bashrc`:
+Symlink ghauto as `gh` in a directory that comes before the real `gh` on your `PATH`:
 
 ```sh
-gh() { ghauto gh "$@"; }
+mkdir -p ~/.local/bin
+ln -sf "$(command -v ghauto)" ~/.local/bin/gh   # ~/.local/bin must precede gh's dir in PATH
 ```
+
+When run as `gh`, ghauto behaves like `ghauto gh` and calls the real `gh` further down your `PATH`.
+Unlike a shell alias, this also covers apps and editors that run `gh` directly (IDEs, AI agents, GUI clients).
 
 Now `gh issue create`, `gh pr create`, `gh repo clone owner/repo` pick the right account too.
 An explicit `GH_TOKEN=... gh ...` still wins.
