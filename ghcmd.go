@@ -20,8 +20,9 @@ func runGh(args []string) error {
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	cmd.Env = os.Environ()
 
-	// An explicit GH_TOKEN from the user always wins.
-	if os.Getenv("GH_TOKEN") == "" {
+	// An explicit GH_TOKEN from the user always wins. `gh auth` manages the
+	// logins themselves, so it must see gh's own state, not an injected token.
+	if os.Getenv("GH_TOKEN") == "" && (len(args) == 0 || args[0] != "auth") {
 		if host, repo := targetRepo(args); repo != "" {
 			if res, _, err := resolve(host, repo); err == nil {
 				cmd.Env = append(cmd.Env, "GH_TOKEN="+res.Token)
