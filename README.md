@@ -44,7 +44,7 @@ gh auth status         # should list all of them
 With Go:
 
 ```sh
-go install github.com/ayoubben21/ghauto@latest
+go install github.com/ayoubben18/ghauto@latest
 ```
 
 Make sure `$(go env GOPATH)/bin` is on your `PATH`.
@@ -52,7 +52,7 @@ Make sure `$(go env GOPATH)/bin` is on your `PATH`.
 Or clone and build:
 
 ```sh
-git clone https://github.com/ayoubben21/ghauto.git
+git clone https://github.com/ayoubben18/ghauto.git
 cd ghauto
 go build -o ghauto .
 sudo mv ghauto /usr/local/bin/   # or anywhere on your PATH
